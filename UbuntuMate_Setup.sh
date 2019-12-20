@@ -1,15 +1,16 @@
 #!/bin/bash
 clear
 ################################################################################
+#===============================================================================
 # Purpose: 
 #   This script is used to install my common software after a new install
+#	and make automated config changes as needed.
 #
 # Notes: 
-#   This script was designed to be used on Ubuntu, but should work on and
-#   .deb based system.  
+#   This script was designed to be used on Ubuntu.  
 #
 # Assumptions:
-#   We are installing Ubuntu Mate with a normal install.
+#   We are installing Ubuntu Mate.
 #
 ################################################################################
 
@@ -31,6 +32,28 @@ timestamp()
     now=$(date +'%m/%d/%Y %r')
 }
 
+check_exit_status() 
+{
+
+    if [ $? -eq 0 ]
+    then
+        echo
+        echo "Success"
+        echo
+    else
+        echo
+        echo "[ERROR] Process Failed!"
+        echo
+		
+        read -p "The last command exited with an error. Exit script? (y/n) " ans
+
+        if [ "$ans" == "y" ]
+        then
+            exit 1
+        fi
+    fi
+}
+
 reminder()
 {
 echo "##########################################################################"
@@ -46,16 +69,7 @@ echo "tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0"
 echo "#Mount SteamDrive"
 echo "UUID=6c3cfa06-c72e-4e60-be6a-9831ce203845 /media/captainstormy/SteamDrive   ext4    defaults,noatime,nodiratime,discard    0   3"
 echo
-echo "##########################################################################"
-echo "# AppImage Reminder"
-echo "##########################################################################"
 echo
-echo "May need to download the appImage of the following:"
-echo "1. Cura"
-echo "2. Etcher"
-echo "2. FreeCAD"
-echo
-
 }
 
 ################################################################################
@@ -77,6 +91,7 @@ echo "--------------------------------------------------------------------------
 echo
 
 sudo apt update;
+check_exit_status;
 
 echo "--------------------------------------------------------------------------"
 echo "- APT upgrade"    
@@ -84,6 +99,7 @@ echo "--------------------------------------------------------------------------
 echo
 
 sudo apt upgrade -y;
+check_exit_status;
 
 #-------------------------------------------------------------------------------
 #   Root Password
@@ -176,14 +192,6 @@ echo "--------------------------------------------------------------------------
 echo
 
 sudo apt install filezilla -y;
-echo
-
-echo "--------------------------------------------------------------------------"
-echo "- Install cheese"    
-echo "--------------------------------------------------------------------------"
-echo
-
-sudo apt install cheese -y;
 echo
 
 echo "--------------------------------------------------------------------------"
@@ -306,8 +314,8 @@ sudo apt install git-cola -y;
 echo
 
 #git config settings
-#Removed most of these but left this as an exmaple.
-git config --global user.name "captainstormy"
+git config --global user.email "Emails Address changed for Example Script"
+git config --global user.name "Name changed for Example Script"
 
 echo "--------------------------------------------------------------------------"
 echo "- Install aisleriot"    
@@ -357,6 +365,22 @@ echo
 sudo apt install pcsxr -y;
 echo
 
+echo "--------------------------------------------------------------------------"
+echo "- Install Caffeine"    
+echo "--------------------------------------------------------------------------"
+echo
+
+sudo apt install Caffeine -y;
+echo
+
+echo "--------------------------------------------------------------------------"
+echo "- Install tlp"    
+echo "--------------------------------------------------------------------------"
+echo
+
+sudo apt install tlp -y;
+echo
+
 #-------------------------------------------------------------------------------
 #   Add software from Third Parties
 #-------------------------------------------------------------------------------
@@ -379,7 +403,7 @@ echo "--------------------------------------------------------------------------
 echo "- Install youtube-dl"    
 echo "--------------------------------------------------------------------------"
 echo
-#Version in repos is outdated
+#Version in repos is hella outdated
 sudo wget https://yt-dl.org/latest/youtube-dl -O /usr/local/bin/youtube-dl;
 sudo chmod a+x /usr/local/bin/youtube-dl;
 hash -r;
@@ -420,14 +444,14 @@ wget -O ~/Downloads/Minecraft.deb "https://launcher.mojang.com/download/Minecraf
 sudo apt install ~/Downloads/Minecraft.deb -y;
 echo
 
-echo "--------------------------------------------------------------------------"
-echo "- Install Google Chrome"    
-echo "--------------------------------------------------------------------------"
-echo
+#echo "--------------------------------------------------------------------------"
+#echo "- Install Google Chrome"    
+#echo "--------------------------------------------------------------------------"
+#echo
 
-wget -O ~/Downloads/google-chrome-stable_current_amd64.deb "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb";
-sudo apt install ~/Downloads/google-chrome-stable_current_amd64.deb -y;
-echo    
+#wget -O ~/Downloads/google-chrome-stable_current_amd64.deb "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb";
+#sudo apt install ~/Downloads/google-chrome-stable_current_amd64.deb -y;
+#echo    
 
 echo "--------------------------------------------------------------------------"
 echo "- Install Dropbox"    
@@ -459,6 +483,27 @@ then
     sudo apt-get install -y system76-driver
 else
     echo "System76 PPA and Driver install skipped."
+fi
+echo
+
+#-------------------------------------------------------------------------------
+#   Disable Power Saving turning off the Sound Card
+#-------------------------------------------------------------------------------
+echo "--------------------------------------------------------------------------"
+echo "- Turn off Power saving for Sound Card"    
+echo "--------------------------------------------------------------------------"
+echo
+
+read -p "Turn off Power Saving for Sound Card? (y/n) " answer
+echo
+
+if [ "$answer" == "y" ]
+then   
+    sudo cp ~/Documents/Scripts/BashScripts/AudioFix/audio_disable_powersave.conf /etc/modprobe.d
+    sudo cp ~/Documents/Scripts/BashScripts/AudioFix/power_save /sys/module/snd_hda_intel/parameters
+    sudo cp ~/Documents/Scripts/BashScripts/AudioFix/power_save_controller /sys/module/snd_hda_intel/parameters
+else
+    echo "Leaving Sound Card Power Saving alone."
 fi
 echo
 
@@ -504,6 +549,46 @@ echo
 sudo apt remove evolution -y;
 echo
 
+echo "--------------------------------------------------------------------------"
+echo "- Remove cheese"    
+echo "--------------------------------------------------------------------------"
+echo
+
+sudo apt remove cheese -y;
+echo
+
+echo "--------------------------------------------------------------------------"
+echo "- Remove ubuntu-mate-welcome"    
+echo "--------------------------------------------------------------------------"
+echo
+
+sudo snap remove ubuntu-mate-welcome;
+echo
+
+echo "--------------------------------------------------------------------------"
+echo "- Remove software-boutique"    
+echo "--------------------------------------------------------------------------"
+echo
+
+sudo snap remove software-boutique;
+echo
+
+echo "--------------------------------------------------------------------------"
+echo "- Remove deja-dup if it exists"    
+echo "--------------------------------------------------------------------------"
+echo
+
+sudo apt remove deja-dup -y;
+echo
+
+echo "--------------------------------------------------------------------------"
+echo "- Remove gnome-mpv if it exists"    
+echo "--------------------------------------------------------------------------"
+echo
+
+sudo apt remove gnome-mpv -y;
+echo
+
 #-------------------------------------------------------------------------------
 #   Cleanup
 #-------------------------------------------------------------------------------
@@ -513,6 +598,7 @@ echo "--------------------------------------------------------------------------
 echo
 
 sudo apt autoremove --purge -y;
+check_exit_status
 
 echo "--------------------------------------------------------------------------"
 echo "- APT clean"    
@@ -527,11 +613,7 @@ echo
 sudo du -sh /var/cache/apt/archives
 echo
 
-echo "--------------------------------------------------------------------------"
-echo "- updatedb"    
-echo "--------------------------------------------------------------------------"
-
-sudo updatedb;
+check_exit_status
 
 echo "--------------------------------------------------------------------------"
 echo "- Check Support Status"    
