@@ -19,8 +19,6 @@ date=$(date +"%m-%d-%Y")
 # Dynamic Variables
 now=$(date +'%m/%d/%Y %r')
 
-Folder=none
-
 ################################################################################
 #   Define Functions
 ################################################################################
@@ -56,7 +54,7 @@ sudo chmod 770 $ToLocation$year/$date;
 echo
 
 echo "--------------------------------------------------------------------------"
-echo "- $Folder"
+echo "- Backup $FromLocation"
 echo "--------------------------------------------------------------------------"
 echo
 sudo rsync -avh $FromLocation $ToLocation$year/$date;
